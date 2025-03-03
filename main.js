@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const url = require('url');
+const url = require("url");
 
 require("dotenv").config();
 const https = require("https");
@@ -107,7 +107,7 @@ async function get_titles(apiUrl) {
         try {
           //   const jsonData = JSON.parse(data);
           //   resolve(jsonData);
-          
+
           resolve(getUniqueNamesCommaSeparated(data));
         } catch (error) {
           reject(error);
@@ -223,7 +223,7 @@ function isValidWebsite(website) {
     }
 
     // Optional: Check for specific protocols (e.g., http, https)
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
       return false;
     }
 
@@ -232,12 +232,15 @@ function isValidWebsite(website) {
     return false; // Invalid URL format
   }
 }
-async function refreshAiTools(){ 
+async function refreshAiTools() {
   const titles = await get_titles(apiUrl);
-  let prompt = "give me a list of new Artificial Intelligence tools (output only the new list comma separated) the tools should NOT be one of this: " + titles + " don't output anything else.";
+  let prompt =
+    "give me a list of new,interesting , modern and must use Artificial Intelligence tools (output only the new list comma separated) the tools should NOT be one of this: " +
+    titles +
+    " don't output anything else.";
   let geminiResult = await model.generateContent([prompt]);
 
-  const results = geminiResult = geminiResult.response.text();
+  const results = (geminiResult = geminiResult.response.text());
 
   aiTools = results.trim();
   //console.log(results);
@@ -246,7 +249,6 @@ async function refreshAiTools(){
 //------------------------- main --------------------------------
 let ai_tools = "";
 (async () => {
-
   await refreshAiTools();
 
   const doneTools = await readToolsFromFile();
@@ -259,11 +261,10 @@ let ai_tools = "";
     // Process the API data here
 
     for (const tool of tools) {
-        
-        if(doneTools.indexOf(tool) !== -1) {
-            continue;
-        }
-        console.log("Processing tool: " + tool);
+      if (doneTools.indexOf(tool) !== -1) {
+        continue;
+      }
+      console.log("Processing tool: " + tool);
 
       const prompt =
         "Create me a full blog in Arabic to review the AI tool '" +
@@ -283,16 +284,18 @@ let ai_tools = "";
         const parts2 = parts[1].split("\n\n");
         const cats = parts2[0].trim().replace(" ", "");
         const website = parts2[1].trim();
-        if(!isValidWebsite(website)){
+        if (!isValidWebsite(website)) {
           continue;
         }
-        console.log( cats, website);
-        const publish_results =JSON.parse( await publish_post(apiUrl, {
-          body: blogBody,
-          title: tool,
-          cats: cats,
-          website: website,
-        }));
+        console.log(cats, website);
+        const publish_results = JSON.parse(
+          await publish_post(apiUrl, {
+            body: blogBody,
+            title: tool,
+            cats: cats,
+            website: website,
+          })
+        );
         if (publish_results.status == "success") {
           await appendNewToolsToFile(tool);
         } else {
